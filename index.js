@@ -31,7 +31,7 @@ export const transpose = pixels => {
 };
 
 
-export const file2imagedata = async (file, { size = 512 } = {}) => {
+export const file2imagedata = async (file, { size = -1 } = {}) => {
     if (!(file instanceof File)) {
         throw new Error('This is not an "File" Object!');
     }
@@ -43,9 +43,12 @@ export const file2imagedata = async (file, { size = 512 } = {}) => {
         throw new Error('not Image');
     }
 
-    size = Number(size) || 512;
+    size = Number(size) || -1;
     if (size >= 65536) {
         throw new Error('big size');
+    }
+    if (size < 0) {
+        size = Infinity;
     }
 
 
@@ -191,14 +194,25 @@ class GrayData {
 }
 
 
-export const toThumbnail = async (file, { size = 512, type = 'image/jpeg', quality = 0.8 } = {}) => {
+export const toThumbnail = async (file, { outputSize = 512, inputSize = 256, type = 'image/jpeg', quality = 0.8 } = {}) => {
     let result = {
         row: 0,
         entropy: null
     };
 
 
-    const pixels = await file2imagedata(file, { size });
+    outputSize = Number(outputSize);
+    if (outputSize <= 0) {
+        outputSize = 512;
+    }
+
+    inputSize = Number(inputSize) || 256;
+    if (inputSize <= 0) {
+        inputSize = 256
+    }
+
+
+    const pixels = await file2imagedata(file, { size: inputSize });
     let _pixels = pixels;
     if (_pixels.width > _pixels.height) {
         _pixels = transpose(pixels);
@@ -214,10 +228,6 @@ export const toThumbnail = async (file, { size = 512, type = 'image/jpeg', quali
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
 
-    canvas.width = Math.min(pixels.width, pixels.height);
-    canvas.height = Math.min(pixels.width, pixels.height);
-
-
     const promise = new Promise((resolve, reject) => {
         const img = new Image();
 
@@ -225,6 +235,10 @@ export const toThumbnail = async (file, { size = 512, type = 'image/jpeg', quali
         img.onerror = reject;
         img.onload = _ => {
             let [sx, sy, sWidth, sHeight] = [0, 0, img.naturalWidth, img.naturalHeight];
+
+            canvas.width = Math.min(outputSize, img.naturalWidth, img.naturalHeight);
+            canvas.height = canvas.width;
+
             if (sWidth <= sHeight) {
                 sy += Math.floor(result.row * sHeight / pixels.height);
             } else {
