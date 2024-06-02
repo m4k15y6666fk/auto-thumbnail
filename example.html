@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Example</title>
 
     <script type="module">
         import { toThumbnail } from './index.js';
@@ -12,131 +12,16 @@
         const $ = (...args) => document.querySelector(...args);
         const input = $('#input-file');
         input.addEventListener('change', async _ => {
+            if (input.files[0].length <= 0) {
+                console.error('no files');
+                return;
+            }
+
             const file = input.files[0];
             $('#original').src = URL.createObjectURL(file);
 
             const blob = await toThumbnail(file, { type: 'image/webp' });
             $('#thumbnail').src = URL.createObjectURL(blob);
-
-
-
-            // const img = new Image();
-            // img.src = URL.createObjectURL( file );
-            // img.onload = _ => {
-            //     let [sx, sy, sWidth, sHeight] = [0, 0, img.naturalWidth, img.naturalHeight];
-            //     const SIDE = Math.min(512, sWidth, sHeight);
-
-            //     if (sWidth <= sHeight) {
-            //         canvas.width = SIDE;
-            //         canvas.height = Math.floor( SIDE * sHeight / sWidth );
-            //     } else {
-            //         canvas.width = Math.floor( SIDE * sWidth / sHeight );
-            //         canvas.height = SIDE;
-            //     }
-
-            //     console.debug('DEBUG: input info', {
-            //         sWidth,
-            //         sHeight,
-            //         ['canvas.width']: canvas.width,
-            //         ['canvas.height']: canvas.height
-            //     });
-
-            //     ctx.drawImage(img, sx, sy, sWidth, sHeight, 0, 0, canvas.width, canvas.height);
-
-            //     let pixels = ctx.getImageData(0, 0, canvas.width, canvas.height);
-            //     if (sWidth > sHeight) {
-            //         pixels = transpose(pixels);
-            //     }
-
-            //     let raw = new Uint8ClampedArray( Math.floor( pixels.data.length / 4 ) );
-            //     let j = 0;
-            //     for (let y = 0; y < pixels.height; y++) {
-            //         for (let x = 0; x < pixels.width; x++) {
-            //             const i = (y * 4) * pixels.width + x * 4;
-            //             const rgb = Math.round( ( pixels.data[i] + pixels.data[i + 1] + pixels.data[i + 2] ) / 3 );
-            //             // gray_pixels.data[i] = rgb;
-            //             // gray_pixels.data[i + 1] = rgb;
-            //             // gray_pixels.data[i + 2] = rgb;
-            //             // gray_pixels.data[i + 3] = pixels.data[i + 3];
-
-            //             raw[j] = rgb;
-            //             j++;
-            //         }
-            //     }
-
-            //     const g_canvas = $('#gray-scale')
-            //     const g_ctx = g_canvas.getContext('2d');
-            //     // g_canvas.width = canvas.width;
-            //     // g_canvas.height = canvas.height;
-            //     g_canvas.width = canvas.height;
-            //     g_canvas.height = canvas.width;
-            //     g_ctx.putImageData(pixels, 0, 0, 0, 0, g_canvas.width, g_canvas.height);
-
-            //     console.debug('DEBUG: gray scale data', raw);
-
-            //     let result = {
-            //         entropy: 0,
-            //         row: 0
-            //     };
-            //     let k = 0;
-            //     if ( pixels.height < pixels.width ) {
-            //         throw new Error();
-            //     }
-
-            //     const squared_bytes = pixels.width ** 2;
-            //     while (k < ( pixels.height - pixels.width )) {
-            //         console.log('k retsu: ', k);
-
-            //         const start_byte = k * pixels.width;
-            //         const end_byte = start_byte + squared_bytes;
-
-            //         const p = new Uint32Array(256);
-            //         raw.slice(start_byte, end_byte)
-            //            .forEach(v => p[v] += 1);
-
-            //         let ent = 0;
-            //         for (let i of p) {
-            //             if (i === 0) continue;
-            //             const pp = i / squared_bytes;
-            //             ent = ent - ( pp * Math.log2(pp) )
-            //         };
-            //         console.log('entropy: ', ent);
-
-            //         if (ent > result.entropy) {
-            //             result.entropy = ent;
-            //             result.row = k;
-            //         };
-
-            //         k++;
-            //     }
-            //     console.log(result);
-
-            //     const _canvas = $('#cv');
-            //     const _ctx = _canvas.getContext('2d');
-
-            //     _canvas.width = SIDE;
-            //     _canvas.height = SIDE;
-
-
-            //     if (sWidth <= sHeight) {
-            //         sy += Math.floor(result.row * sHeight / canvas.height);
-            //     } else {
-            //         sx += Math.floor(result.row * sWidth / canvas.width);
-            //     }
-            //     if (sWidth <= sHeight) {
-            //         sHeight = sWidth;
-            //     } else {
-            //         sWidth = sHeight;
-            //     }
-
-            //     console.log(sx, sy, sWidth, sHeight, _canvas.width, _canvas.height);
-            //     _ctx.drawImage(img, sx, sy, sWidth, sHeight, 0, 0, _canvas.width, _canvas.height);
-            //     // _ctx.putImageData(pixels, 0, 0, 0, result.row, _canvas.width, _canvas.height);
-            //     // canvas.toBlob(blob => {
-            //     //     console.log('completed.');
-            //     //     $('#gray-image').src = URL.createObjectURL( blob );
-            //     // }, 'image/png', 1);
-            // };
         });
     </script>
 </head>
